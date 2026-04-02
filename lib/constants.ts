@@ -54,7 +54,7 @@ export const PATHS = {
 export type IconName = keyof typeof PATHS;
 
 export const SLIDES = [
-  {em:"💰", title:"Take Control of\nYour Money", sub:"Track every naira, build real savings, and stop living paycheck to paycheck.", bg:"linear-gradient(160deg,#0FA958,#006B35)"},
+  {em:"💰", title:"Take Control of\nYour Money", sub:"Track every naira, build real savings, and stop living paycheck to paycheck.", bg:"linear-gradient(160deg,#0FA958,#00C853)"},
   {em:"🧠", title:"Your Personal\nAI Coach", sub:"Get smart daily insights tailored to your Nigerian lifestyle and spending habits.", bg:"linear-gradient(160deg,#1A1A2E,#16213E)"},
   {em:"💡", title:"Discover Your\nNext Hustle", sub:"Browse curated side hustles matched to your skills and startup budget.", bg:"linear-gradient(160deg,#FF6B35,#C74B00)"},
   {em:"🏆", title:"Earn Badges\n& Level Up", sub:"Build great money habits, complete goals, and unlock achievements.", bg:"linear-gradient(160deg,#7B2FBE,#4A0080)"},
@@ -76,3 +76,141 @@ export const CURRENCY_MAP = {
   "Canada":{"symbol":"CA$","locale":"en-CA","name":"Dollars"},
   "default":{"symbol":"₦","locale":"en-NG","name":"Naira"}
 } as const;
+
+export const HUSTLES = [
+  {id:1,em:"📦",title:"Mini Importation",cat:"Trade",desc:"Source products from China, sell locally for 3x profit",cost:20000,diff:"Medium",time:"2–4 weeks",rating:4.7,reviews:234,
+   badge:{em:"📦",title:"Import Pioneer",color:"#FF8C42"},
+   roadmap:[
+     {phase:"Research",steps:["Identify 3 trending product categories on Alibaba","Compare pricing across 5+ suppliers","Calculate landed cost (product + shipping + customs)","Validate demand via Jiji or Instagram polls"]},
+     {phase:"Sourcing",steps:["Place a small test order (minimum quantity)","Use a trusted freight forwarder (e.g. Topship, Sendbox)","Track shipment and clear customs at arrival","Inspect all products before selling"]},
+     {phase:"Sales Setup",steps:["Create an Instagram business page with product photos","Set up a WhatsApp Business catalogue","Price products at 3x–4x landed cost","Set up mobile money / bank transfer payment"]},
+     {phase:"Launch & Scale",steps:["Post 3 products daily with quality photos","Run a flash sale for first 20 customers","Collect reviews and testimonials","Reinvest 50% of profit into next stock"]},
+   ]},
+  {id:2,em:"🎨",title:"Freelance Design",cat:"Creative",desc:"Sell logos, flyers & graphics to SMEs and entrepreneurs",cost:5000,diff:"Easy",time:"Start today",rating:4.9,reviews:512,
+   badge:{em:"🎨",title:"Creative Pro",color:"#9B59B6"},
+   roadmap:[
+     {phase:"Skill Setup",steps:["Install Canva Pro or download Figma (free)","Complete 2 free YouTube tutorials on logo design","Practice by recreating 3 existing logos","Learn basic colour theory and font pairing"]},
+     {phase:"Portfolio",steps:["Design 5 sample logos for fictional businesses","Create 3 flyer templates for events/parties","Make a social media post template pack","Compile everything into a PDF portfolio"]},
+     {phase:"Find Clients",steps:["Post portfolio on Twitter, LinkedIn and Instagram","DM 10 local businesses offering a free mini design","List services on Fiverr and Upwork","Join Nigerian freelance WhatsApp groups"]},
+     {phase:"Get Paid & Grow",steps:["Charge \u20a65,000–\u20a620,000 per logo","Always get 50% upfront before starting","Ask every client for a review or referral","Upsell: branding packages, social media management"]},
+   ]},
+  {id:3,em:"🛵",title:"Food Delivery",cat:"Logistics",desc:"Partner with restaurants and earn per delivery in your area",cost:0,diff:"Easy",time:"This week",rating:4.5,reviews:189,
+   badge:{em:"🛵",title:"Road Warrior",color:"#E74C3C"},
+   roadmap:[
+     {phase:"Register",steps:["Download Chowdeck, Glovo or Bolt Food app","Complete rider registration with valid ID","Submit guarantor form and bank details","Attend mandatory orientation (online or in-person)"]},
+     {phase:"Equipment",steps:["Get an insulated delivery bag (\u20a63,000–\u20a65,000)","Ensure your phone has a good data plan","Map out key restaurant clusters in your area","Download Google Maps offline for your zones"]},
+     {phase:"Start Earning",steps:["Work peak hours: 11AM–2PM and 6PM–9PM","Accept all orders to build your rating above 4.5","Stay near restaurant hubs for faster pickups","Track your daily earnings in NairaCoach"]},
+     {phase:"Optimize",steps:["Achieve 4.8+ rating for priority order allocation","Apply for platform bonuses and surge zones","Consider adding a second platform (Bolt + Chowdeck)","Save 30% of daily earnings for bike maintenance"]},
+   ]},
+  {id:4,em:"📚",title:"Tutoring",cat:"Education",desc:"Teach WAEC/JAMB subjects — high demand and consistent income",cost:2000,diff:"Easy",time:"3 days",rating:4.8,reviews:341,
+   badge:{em:"📚",title:"Knowledge Boss",color:"#3498DB"},
+   roadmap:[
+     {phase:"Prepare",steps:["Choose 1–2 subjects you scored A or B in WAEC/JAMB","Get current WAEC past questions (buy or download PDF)","Create a simple 3-month lesson plan","Set your hourly rate (\u20a61,500–\u20a63,000/hr)"]},
+     {phase:"Find Students",steps:["Tell neighbours and church/mosque members you're tutoring","Print simple flyers and post at secondary schools nearby","Create a WhatsApp status advertising your service","Offer first lesson free to build trust"]},
+     {phase:"Teach & Earn",steps:["Hold lessons 3–5 days a week (morning or evening)","Track attendance and progress for each student","Give weekly mini-tests to show parents results","Collect payment weekly or monthly upfront"]},
+     {phase:"Scale Up",steps:["Build a WhatsApp group for multiple students (group lessons)","Charge \u20a65,000–\u20a615,000/month per student for group","Create short video lessons to sell on Selar","Expand to online tutoring via Zoom or Google Meet"]},
+   ]},
+  {id:5,em:"🎬",title:"Content Creation",cat:"Digital",desc:"Monetize your knowledge on TikTok, YouTube or Instagram",cost:10000,diff:"Medium",time:"1–2 months",rating:4.6,reviews:278,
+   badge:{em:"🎬",title:"Content King",color:"#E91E63"},
+   roadmap:[
+     {phase:"Niche & Setup",steps:["Choose a profitable niche: finance, food, comedy, or education","Identify your target audience (age, location, pain point)","Create accounts on TikTok AND Instagram (same name)","Write your bio clearly: what you do + who it helps"]},
+     {phase:"Equipment",steps:["Buy a ring light (\u20a63,000–\u20a67,000) and tripod (\u20a62,000)","Use a budget lavalier mic or AirPods for audio","Use your existing smartphone (no camera needed)","Learn basic video editing on CapCut (free)"]},
+     {phase:"Content & Growth",steps:["Post 1 video every day for 30 days minimum","Use trending sounds and hashtags for first 500 followers","Engage: reply to every comment in the first hour","Collaborate with 2 creators in your niche monthly"]},
+     {phase:"Monetize",steps:["Apply for TikTok Creator Fund at 1,000 followers","Pitch brand deals via email once you have 2,000+ followers","Sell a digital product (e-book, template) on Selar","Offer paid shoutouts to small businesses in your niche"]},
+   ]},
+  {id:6,em:"💳",title:"POS Business",cat:"Finance",desc:"Run a POS terminal and earn commission on every transaction",cost:50000,diff:"Easy",time:"1 week",rating:4.7,reviews:445,
+   badge:{em:"💳",title:"Cashflow Master",color:"#009688"},
+   roadmap:[
+     {phase:"Setup",steps:["Apply online via Moniepoint, OPay or PalmPay agent portal","Pay terminal deposit (\u20a620,000–\u20a650,000 depending on provider)","Complete KYC: BVN, NIN, utility bill, passport photo","Receive terminal within 3–5 working days"]},
+     {phase:"Location",steps:["Choose high-foot-traffic location: market, bus stop, church exit","Negotiate rent if needed (or use your shop/home front)","Set up a clear sign: 'POS AVAILABLE — Fast & Reliable'","Keep \u20a650,000+ float to handle large withdrawals"]},
+     {phase:"Operations",steps:["Open by 7AM, close by 9PM (extended hours = more income)","Charge \u20a6100–\u20a6200 per transaction (market rate)","Keep receipt records for every transaction in a book","Maintain float: restock from your bank account daily"]},
+     {phase:"Grow Revenue",steps:["Add airtime & data sales for extra income","Offer bill payments (electricity, DSTV, water)","Apply for second terminal for a second location","Track monthly earnings and reinvest in larger float"]},
+   ]},
+  {id:7,em:"👗",title:"Cloth Reselling",cat:"Trade",desc:"Source trending clothes from Oshodi/Balogun, resell online for profit",cost:15000,diff:"Easy",time:"3 days",rating:4.4,reviews:167,
+   badge:{em:"👗",title:"Fashion Plug",color:"#FF6B35"},
+   roadmap:[
+     {phase:"Source Stock",steps:["Visit Oshodi, Balogun or Katangua market on weekdays (less crowd)","Focus on trending items: agbada, corporate wear, native materials","Buy in bulk (grade/bale) for the best price","Budget \u20a615,000 for first stock (5–10 items)"]},
+     {phase:"Photography",steps:["Iron/steam all items before shooting","Use a white wall or clean background for photos","Shoot in natural daylight for best colours","Take front, back and detail close-up shots"]},
+     {phase:"Sales Channels",steps:["Create an Instagram page with consistent aesthetic","List on Jiji.ng for walk-in buyers","Join Facebook Marketplace and fashion buy/sell groups","Build a WhatsApp broadcast list of 100+ buyers"]},
+     {phase:"Scale",steps:["Track which items sell fastest and restock those","Offer delivery within Lagos for \u20a61,000–\u20a62,000","Run monthly clearance sales to move slow items","Move to dropshipping once you have 200+ followers"]},
+   ]},
+  {id:8,em:"💄",title:"Makeup & Beauty",cat:"Beauty",desc:"Offer makeup services for events, weddings and photoshoots",cost:30000,diff:"Medium",time:"2 weeks",rating:4.8,reviews:390,
+   badge:{em:"💄",title:"Glam Artist",color:"#E91E63"},
+   roadmap:[
+     {phase:"Training",steps:["Take a 2-week makeup course (\u20a615,000–\u20a630,000 online or local)","Practice daily on yourself and willing family/friends","Watch 20+ YouTube tutorials on Nigerian skin tones","Study bridal, editorial and everyday makeup looks"]},
+     {phase:"Kit",steps:["Buy starter kit: foundation (3 shades), eyeshadow palette, lashes","Get a professional makeup brush set (\u20a65,000+)","Invest in good lighting: ring light minimum","Buy a portable makeup bag or trolley"]},
+     {phase:"Portfolio",steps:["Offer 5 free makeup sessions to build your portfolio","Document every look with before/after photos","Create a dedicated Instagram page for your work","Ask clients to tag you when they wear the look"]},
+     {phase:"Charge & Grow",steps:["Set rates: gele \u20a65,000, bridal \u20a625,000–\u20a660,000","List on Glam Africa, Bellanaija Weddings vendor list","Partner with photographers and aso-oke sellers","Offer makeup classes at \u20a610,000–\u20a625,000 per student"]},
+   ]},
+  {id:9,em:"🏗️",title:"Building Materials Supply",cat:"Trade",desc:"Supply sand, granite, cement and blocks to construction sites",cost:80000,diff:"Hard",time:"2–3 months",rating:4.3,reviews:87,
+   badge:{em:"🏗️",title:"Construction Boss",color:"#795548"},
+   roadmap:[
+     {phase:"Market Research",steps:["Survey your local area for active construction sites","Identify 3–5 material suppliers/quarries to partner with","Get current prices: cement, granite, sand per trip","Calculate your margin (typically 15–25%)"]},
+     {phase:"Logistics Setup",steps:["Partner with a tipper truck owner (revenue share or hire)","Register a business name with CAC (\u20a610,000–\u20a625,000)","Open a dedicated business bank account","Get a mobile phone with WhatsApp Business for orders"]},
+     {phase:"Client Acquisition",steps:["Visit construction sites and speak with site managers","Distribute business cards to architects and contractors","Join construction/real estate groups on WhatsApp and Telegram","Offer first delivery at cost to win confidence"]},
+     {phase:"Operations & Scale",steps:["Deliver on time — reliability is everything in this business","Hire a dedicated accountant/bookkeeper as volume grows","Expand to block-making for higher margins","Target estate developers for bulk recurring contracts"]},
+   ]},
+  {id:10,em:"🏠",title:"Real Estate Agency",cat:"Property",desc:"Connect property buyers/sellers and earn 5–10% commission on deals",cost:0,diff:"Hard",time:"2–4 months",rating:4.3,reviews:98,
+   badge:{em:"🏠",title:"Property Mogul",color:"#2C3E50"},
+   roadmap:[
+     {phase:"Foundation",steps:["Join a registered real estate firm as an intern agent","Study the Real Estate law and agency agreement formats","Get NIN, CAC registration and open a business account","Complete free/paid courses on PropertyPro, NaijaHouses"]},
+     {phase:"Build Network",steps:["Connect with 20+ landlords willing to list their properties","Partner with a property lawyer for transaction support","Join NIESV, NIOB or estate agency WhatsApp networks","Attend 2 property expos or industry events"]},
+     {phase:"List & Market",steps:["List all properties on PropertyPro, NigeriaPropertyCentre and Jiji","Shoot professional photos for every listing","Create an Instagram page showcasing available properties","Run targeted Facebook ads for \u20a65,000–\u20a610,000 per campaign"]},
+     {phase:"Close & Earn",steps:["Follow up leads within 24 hours — speed wins in real estate","Negotiate and document all terms before viewing","Use a lawyer to handle all agreements and signatures","Collect your commission (5–10%) upon deal completion"]},
+   ]},
+];
+
+export const HUSTLE_UPGRADES: Record<number, number[]> = {
+  2: [11,12],   // Freelance Design -> Brand Studio -> Creative Director
+  5: [13,14],   // Content Creation -> Videography -> Cinematographer & Director
+  8: [15],      // Makeup & Beauty -> Beauty Brand & Academy
+  4: [16],      // Tutoring -> Online Course Creator
+  1: [17],      // Mini Importation -> E-commerce Store
+  6: [18],      // POS Business -> Fintech Agent Network
+};
+
+export const UPGRADE_HUSTLES = [
+  // ... (keeping this short for now, you can add others)
+  {id:11,em:"🏢",title:"Brand Studio",cat:"Creative",
+   desc:"Run a full-service branding agency — logos, identity systems, websites and social media for businesses",
+   cost:50000,diff:"Medium",time:"2–3 months",rating:4.8,reviews:143,
+   upgradeOf:2,tier:2,tierLabel:"Level 2",
+   badge:{em:"🏢",title:"Brand Architect",color:"#7B2FBE"},
+   roadmap:[
+     {phase:"Agency Setup",steps:["Register your business name with CAC","Open a dedicated business bank account","Build a professional portfolio website on Wix or Webflow","Write your service packages: Starter, Business, Premium"]},
+     {phase:"Team & Tools",steps:["Hire 1–2 junior designers as freelancers (pay per project)","Set up project management: Trello or Notion","Get Adobe Creative Cloud (₦25,000/month) or stay on Figma","Create proposal and invoice templates"]},
+     {phase:"Client Pipeline",steps:["Cold DM 20 SMEs weekly with tailored portfolio snippets","Partner with web developers and social media managers","Get featured on BellaNaija Business or BusinessDay","Run one free brand audit for a visible business for PR"]},
+     {phase:"Scale Revenue",steps:["Target startups raising funding — they all need brand identity","Offer retainer packages (₦50,000–₦150,000/month)","License templates and brand kits on Selar","Speak at entrepreneur events to build authority"]},
+   ]},
+];
+
+export const ALL_HUSTLES = [...HUSTLES, ...UPGRADE_HUSTLES];
+
+export const ALL_BADGES = [
+  {id:1,em:"⭐",title:"First Step",desc:"Logged your first expense",color:"#FFD93D",cat:"Beginner"},
+  {id:2,em:"🛡️",title:"Saver",desc:"Set your first savings goal",color:"#0FA958",cat:"Saving"},
+  {id:3,em:"🏆",title:"Hustle King",desc:"Started your first hustle",color:"#FF8C42",cat:"Hustle"},
+  {id:4,em:"🎯",title:"Goal Crusher",desc:"Completed your first goal",color:"#4CAF50",cat:"Goals"},
+  {id:5,em:"🔥",title:"5-Day Streak",desc:"Logged expenses 5 days in a row",color:"#E74C3C",cat:"Consistency"},
+  {id:6,em:"⚡",title:"Speed Logger",desc:"Logged 5 expenses in one day",color:"#FFD93D",cat:"Beginner"},
+  {id:7,em:"👑",title:"Budget King",desc:"Stayed under budget for a week",color:"#FF6B35",cat:"Saving"},
+  {id:8,em:"🥇",title:"Goal Master",desc:"Completed 3 financial goals",color:"#00BCD4",cat:"Goals"},
+  {id:9,em:"📈",title:"Analytics Pro",desc:"Viewed analytics 5 times",color:"#3F51B5",cat:"Learning"},
+  {id:10,em:"🛍️",title:"Hustle Finisher",desc:"Completed all phases of a hustle",color:"#795548",cat:"Hustle"},
+  {id:11,em:"🌍",title:"Naija Champ",desc:"Saved a total of \u20a6100,000",color:"#009688",cat:"Saving"},
+  {id:12,em:"❤️",title:"Consistent",desc:"Used the app for 7 days straight",color:"#E91E63",cat:"Consistency"},
+  {id:13,em:"💼",title:"Multi-Hustler",desc:"Started 3 hustles simultaneously",color:"#6C3483",cat:"Hustle"},
+  {id:14,em:"🚀",title:"Phase Crusher",desc:"Completed 10 hustle roadmap steps",color:"#1A5276",cat:"Hustle"},
+  {id:15,em:"💯",title:"100% Done",desc:"Completed a full hustle roadmap",color:"#196F3D",cat:"Hustle"},
+];
+
+export const DAILY_TASKS = [
+  {id:"dt1",title:"Log your breakfast spend",icon:"food",xp:10},
+  {id:"dt2",title:"Log your transport today",icon:"car",xp:10},
+  {id:"dt3",title:"Check your analytics",icon:"chart",xp:15},
+  {id:"dt4",title:"Browse a hustle idea",icon:"bulb",xp:15},
+  {id:"dt5",title:"Add a financial goal",icon:"target",xp:25},
+];
+
+export const CAT_COLORS: Record<string, string> = {Food:"#FF8C42",Transport:"#9E9E9E",Bills:"#FFD93D",Shopping:"#9B59B6",Health:"#E74C3C",Entertainment:"#3498DB",Other:"#27AE60"};
+export const EXP_CATS = Object.keys(CAT_COLORS);
