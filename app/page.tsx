@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Icon } from '@/components/Icons';
+import { createClient } from '@/utils/supabase/client';
 import {
   SLIDES, INCOME_RANGES, OCCUPATIONS, SKILLS, HABITS, COUNTRIES,
   ALL_HUSTLES, HUSTLE_UPGRADES, ALL_BADGES, DAILY_TASKS, CAT_COLORS, EXP_CATS,
@@ -30,28 +31,13 @@ const fmt = (n: number) => {
   return "₦" + Number(n).toLocaleString('en-NG', { maximumFractionDigits: 0 });
 };
 
-// --- Components ---
-const Toast = ({ msg, on }: { msg: string; on: boolean }) => (
-  <div style={{
-    position: "fixed", bottom: 88, left: "50%",
-    transform: `translateX(-50%) translateY(${on ? 0 : 10}px)`,
-    opacity: on ? 1 : 0, background: "#111", color: "#fff",
-    padding: "10px 22px", borderRadius: 14, fontSize: 13, fontWeight: 700,
-    zIndex: 9998, transition: "all 0.3s", whiteSpace: "nowrap",
-    boxShadow: "0 6px 24px rgba(0,0,0,0.3)", pointerEvents: "none",
-    display: "flex", alignItems: "center", gap: 8
-  }}>
-    <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#0FA958", flexShrink: 0 }} />
-    {msg}
-  </div>
-);
-
 // --- Main Application ---
 export default function NairaCoach() {
   const [phase, setPhase] = useState('splash');
   const [user, setUser] = useState<any>(null);
   const [expenses, setExpenses] = useState<any[]>([]);
   const [xp, setXp] = useState(0);
+  const supabase = createClient();
 
   // Initialize data on mount
   useEffect(() => {
@@ -60,6 +46,17 @@ export default function NairaCoach() {
     setExpenses(lsGet("expenses", []));
     setXp(lsGet("xp", 0));
   }, []);
+
+  // Example of client-side data fetching
+  useEffect(() => {
+    async function fetchTodos() {
+      if (phase === 'app') {
+        const { data } = await supabase.from('todos').select();
+        console.log('Todos:', data);
+      }
+    }
+    fetchTodos();
+  }, [phase, supabase]);
 
   if (phase === 'splash') {
     return (
@@ -70,7 +67,10 @@ export default function NairaCoach() {
         <h1 className="text-4xl font-black mb-4 tracking-tighter">NairaCoach</h1>
         <p className="text-lg opacity-80 mb-12">Your Nigerian personal finance coach.</p>
         <button
-          onClick={() => setPhase('app')}
+          onClick={() => {
+            setPhase('app');
+            lsSet('phase', 'app');
+          }}
           className="w-full max-w-xs py-4 bg-white text-green-700 font-bold rounded-2xl shadow-xl active:scale-95 transition-transform"
         >
           Get Started
@@ -112,7 +112,7 @@ export default function NairaCoach() {
               </div>
             ) : (
               <div className="space-y-3">
-                {expenses.map(e => (
+                {expenses.map((e: any) => (
                   <div key={e.id} className="bg-white p-4 rounded-2xl flex items-center justify-between shadow-sm">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
