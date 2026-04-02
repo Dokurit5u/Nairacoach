@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@/components/Icons';
 import { createClient } from '@/utils/supabase/client';
 import {
   SLIDES, INCOME_RANGES, OCCUPATIONS, SKILLS, HABITS, COUNTRIES,
-  ALL_HUSTLES, ALL_BADGES, DAILY_TASKS, CAT_COLORS, EXP_CATS,
-  HUSTLES
+  ALL_HUSTLES, HUSTLE_UPGRADES, ALL_BADGES, DAILY_TASKS, CAT_COLORS, EXP_CATS,
+  CURRENCY_MAP, HUSTLES, UPGRADE_HUSTLES
 } from '@/lib/constants';
 
 // --- Utility Functions ---
@@ -45,7 +45,6 @@ const Sheet = ({ show, onClose, children, title }: any) => {
   );
 };
 
-// --- Main Application ---
 export default function NairaCoach() {
   const [phase, setPhase] = useState('loading'); // splash, register, app
   const [tab, setTab] = useState('home');
@@ -54,13 +53,19 @@ export default function NairaCoach() {
   const [incomes, setIncomes] = useState<any[]>([]);
   const [xp, setXp] = useState(0);
   const [streak, setStreak] = useState(0);
+  const [goals, setGoals] = useState<any[]>([]);
+  const [activeHustles, setActiveHustles] = useState<any[]>([]);
+  const [badges, setBadges] = useState<any[]>([]);
 
   // UI State
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [showAddIncome, setShowAddIncome] = useState(false);
+  const [showGoalForm, setShowGoalForm] = useState(false);
+  const [selectedHustle, setSelectedHustle] = useState<any>(null);
   const [splashIdx, setSplashIdx] = useState(0);
-  const [regStep, setRegStep] = useState(0);
   const [regForm, setRegForm] = useState({ name: '', occupation: '', incomeRange: '', habit: '' });
+  const [aiTxt, setAiTxt] = useState("Track every naira for 7 days — you'll be surprised where it goes.");
+  const [aiLoad, setAiLoad] = useState(false);
 
   const supabase = createClient();
 
@@ -68,34 +73,45 @@ export default function NairaCoach() {
     setUser(lsGet("user", null));
     setExpenses(lsGet("expenses", []));
     setIncomes(lsGet("incomes", []));
+    setGoals(lsGet("goals", []));
+    setBadges(lsGet("badges", ALL_BADGES.map(b => ({...b, earned: false}))));
     setXp(lsGet("xp", 0));
     setStreak(lsGet("streak", 0));
+    setActiveHustles(lsGet("activeHustles", []));
     setPhase(lsGet("phase", "splash"));
   }, []);
 
+  // --- Handlers ---
   const handleStartApp = () => {
-    if (user) {
-      setPhase('app');
-      lsSet('phase', 'app');
-    } else {
-      setPhase('register');
-    }
+    if (user) { setPhase('app'); lsSet('phase', 'app'); }
+    else { setPhase('register'); }
   };
 
   const handleRegister = () => {
-    setUser(regForm);
-    lsSet('user', regForm);
-    setPhase('app');
-    lsSet('phase', 'app');
+    setUser(regForm); lsSet('user', regForm);
+    setPhase('app'); lsSet('phase', 'app');
   };
 
   const addExpense = (amt: number, cat: string) => {
-    const newE = { id: Date.now(), amount: amt, cat, date: 'Today', icon: 'bolt' };
+    const newE = { id: Date.now(), amount: amt, cat, date: new Date().toLocaleDateString(), icon: 'bolt' };
     const updated = [newE, ...expenses];
-    setExpenses(updated);
-    lsSet('expenses', updated);
+    setExpenses(updated); lsSet('expenses', updated);
     setXp(prev => prev + 10);
     setShowAddExpense(false);
+  };
+
+  const fetchAI = async () => {
+    setAiLoad(true);
+    setTimeout(() => {
+      const tips = [
+        "Save before you spend. Transfer the moment money lands.",
+        "The best time to budget was last month. The second best is right now.",
+        "Your top spend this week was Food. Try meal prepping to save ₦5,000.",
+        "Set a goal for an emergency fund. Start with ₦20,000."
+      ];
+      setAiTxt(tips[Math.floor(Math.random() * tips.length)]);
+      setAiLoad(false);
+    }, 1500);
   };
 
   if (phase === 'loading') return <div className="min-h-screen bg-white dark:bg-black" />;
@@ -111,8 +127,7 @@ export default function NairaCoach() {
           <p className="text-lg opacity-80 max-w-xs">{s.sub}</p>
         </div>
         <div className="p-10">
-          <button
-            onClick={() => splashIdx < SLIDES.length - 1 ? setSplashIdx(i => i + 1) : handleStartApp()}
+          <button onClick={() => splashIdx < SLIDES.length - 1 ? setSplashIdx(i => i + 1) : handleStartApp()}
             className="w-full py-5 bg-white text-green-800 font-black rounded-2xl shadow-2xl active:scale-95 transition-all text-lg"
           >
             {splashIdx < SLIDES.length - 1 ? 'Continue →' : 'Get Started 🚀'}
@@ -127,40 +142,22 @@ export default function NairaCoach() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 p-8 font-sans">
         <div className="max-w-md mx-auto">
-          <div className="w-14 h-14 bg-green-600 rounded-[20px] flex items-center justify-center mb-8 shadow-lg shadow-green-200">
-            <Icon name="naira" size={28} color="white" />
-          </div>
-          <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-2">Create Account</h2>
-          <p className="text-gray-500 font-medium mb-8">Let's personalize your experience.</p>
-
+          <div className="w-14 h-14 bg-green-600 rounded-[20px] flex items-center justify-center mb-8 shadow-lg shadow-green-200"><Icon name="naira" size={28} color="white" /></div>
+          <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-2 tracking-tighter">Create Account</h2>
+          <p className="text-gray-500 font-medium mb-8">Let's build your financial profile.</p>
           <div className="space-y-6">
             <div>
               <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Full Name</label>
-              <input
-                value={regForm.name}
-                onChange={e => setRegForm({...regForm, name: e.target.value})}
-                placeholder="e.g. Tunde Okafor"
-                className="w-full p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 focus:border-green-500 outline-none font-bold dark:text-white"
-              />
+              <input value={regForm.name} onChange={e => setRegForm({...regForm, name: e.target.value})} placeholder="e.g. Kola Abraham" className="w-full p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 focus:border-green-500 outline-none font-bold dark:text-white" />
             </div>
             <div>
               <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Occupation</label>
-              <select
-                value={regForm.occupation}
-                onChange={e => setRegForm({...regForm, occupation: e.target.value})}
-                className="w-full p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 outline-none font-bold dark:text-white appearance-none"
-              >
+              <select value={regForm.occupation} onChange={e => setRegForm({...regForm, occupation: e.target.value})} className="w-full p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 outline-none font-bold dark:text-white appearance-none">
                 <option value="">Select Occupation</option>
                 {OCCUPATIONS.map(o => <option key={o} value={o}>{o}</option>)}
               </select>
             </div>
-            <button
-              onClick={handleRegister}
-              disabled={!regForm.name}
-              className="w-full py-5 bg-green-600 text-white font-black rounded-2xl shadow-xl shadow-green-900/20 disabled:bg-gray-300 active:scale-95 transition-all"
-            >
-              Start Coaching →
-            </button>
+            <button onClick={handleRegister} disabled={!regForm.name} className="w-full py-5 bg-green-600 text-white font-black rounded-2xl shadow-xl shadow-green-900/20 disabled:bg-gray-300 active:scale-95 transition-all">Start My Journey →</button>
           </div>
         </div>
       </div>
@@ -168,121 +165,200 @@ export default function NairaCoach() {
   }
 
   // --- 3. MAIN APP ---
-  const balance = incomes.reduce((a,b) => a+b.amount, 0) - expenses.reduce((a,b) => a+b.amount, 0);
+  const totalSpend = expenses.reduce((a, b) => a + b.amount, 0);
+  const totalIncome = incomes.reduce((a, b) => a + b.amount, 0);
+  const balance = totalIncome - totalSpend;
 
   return (
     <div className="max-w-md mx-auto min-h-screen bg-white dark:bg-zinc-950 font-sans pb-24 transition-colors">
 
-      <div className="flex-1">
-        {tab === 'home' && (
-          <div className="p-6">
-            <header className="flex justify-between items-center mb-8">
-              <div>
-                <p className="text-sm text-gray-500 font-medium">Welcome back,</p>
-                <h2 className="text-2xl font-black text-gray-900 dark:text-white">{user?.name} 👋</h2>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="bg-orange-100 dark:bg-orange-950 text-orange-600 px-3 py-1 rounded-full text-xs font-black">🔥 {streak}d</div>
-                <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center text-white font-bold shadow-lg shadow-green-200">
-                  {user?.name?.[0] || 'C'}
-                </div>
-              </div>
-            </header>
+      {tab === 'home' && (
+        <div className="p-6">
+          <header className="flex justify-between items-center mb-8">
+            <div><p className="text-sm text-gray-500 font-medium">Hello,</p><h2 className="text-2xl font-black text-gray-900 dark:text-white">{user?.name} 👋</h2></div>
+            <div className="flex items-center gap-3">
+              <div className="bg-orange-100 dark:bg-orange-950 text-orange-600 px-3 py-1 rounded-full text-xs font-black">🔥 {streak}d</div>
+              <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center text-white font-bold shadow-lg">{user?.name?.[0] || 'C'}</div>
+            </div>
+          </header>
 
-            <div className="bg-gradient-to-br from-green-500 to-green-800 p-8 rounded-[32px] text-white shadow-2xl shadow-green-900/20 dark:shadow-none mb-10 relative overflow-hidden">
-              <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
-              <p className="text-xs uppercase tracking-widest font-black opacity-70 mb-2">Available Balance</p>
-              <h3 className="text-5xl font-black mb-8 tracking-tighter">{fmt(balance)}</h3>
-              <div className="flex gap-4">
-                <button onClick={() => setShowAddIncome(true)} className="flex-1 bg-white/20 hover:bg-white/30 backdrop-blur-md py-3.5 rounded-2xl font-bold text-sm border border-white/10 active:scale-95 transition-all">+ Income</button>
-                <button onClick={() => setShowAddExpense(true)} className="flex-1 bg-white text-green-700 py-3.5 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-all">+ Expense</button>
+          <div className="bg-gradient-to-br from-green-500 to-green-800 p-8 rounded-[32px] text-white shadow-2xl shadow-green-900/20 dark:shadow-none mb-10 relative overflow-hidden">
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
+            <p className="text-xs uppercase tracking-widest font-black opacity-70 mb-2">Net Balance</p>
+            <h3 className="text-5xl font-black mb-8 tracking-tighter">{fmt(balance)}</h3>
+            <div className="flex gap-4">
+              <button onClick={() => setShowAddIncome(true)} className="flex-1 bg-white/20 hover:bg-white/30 backdrop-blur-md py-3.5 rounded-2xl font-bold text-sm border border-white/10 active:scale-95 transition-all">+ Income</button>
+              <button onClick={() => setShowAddExpense(true)} className="flex-1 bg-white text-green-700 py-3.5 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-all">+ Expense</button>
+            </div>
+          </div>
+
+          <div className="bg-green-50 dark:bg-green-900/20 p-5 rounded-3xl mb-10 border border-green-100 dark:border-green-800/30">
+            <div className="flex gap-4 items-start">
+              <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg"><Icon name="spark" size={20} color="white" /></div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-green-600 mb-1">AI Coach Insight</p>
+                <p className="text-sm font-bold text-gray-800 dark:text-zinc-200 leading-relaxed mb-3">{aiTxt}</p>
+                <button onClick={fetchAI} className="text-xs font-black text-green-600 flex items-center gap-1">{aiLoad ? 'Thinking...' : 'Refresh Insight →'}</button>
               </div>
             </div>
-
-            <section className="mb-8">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-black text-lg dark:text-white">Recent Spending</h3>
-                <button className="text-green-600 font-bold text-sm">View All</button>
-              </div>
-              <div className="space-y-3">
-                {expenses.length === 0 ? (
-                  <div className="text-center py-12 bg-gray-50 dark:bg-zinc-900 rounded-[24px] border-2 border-dashed border-gray-100 dark:border-zinc-800 text-gray-400 font-bold italic">Log an expense to see history.</div>
-                ) : (
-                  expenses.slice(0, 5).map(e => (
-                    <div key={e.id} className="bg-white dark:bg-zinc-900 p-4 rounded-2xl flex items-center justify-between border border-gray-50 dark:border-zinc-800 shadow-sm">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gray-50 dark:bg-zinc-800 rounded-2xl flex items-center justify-center">
-                          <Icon name="bolt" size={22} color="#0FA958" />
-                        </div>
-                        <div>
-                          <p className="font-black text-gray-900 dark:text-white text-sm">{e.cat}</p>
-                          <p className="text-[10px] text-gray-400 font-bold">{e.date}</p>
-                        </div>
-                      </div>
-                      <p className="font-black text-gray-900 dark:text-white">-{fmt(e.amount)}</p>
-                    </div>
-                  ))
-                )}
-              </div>
-            </section>
           </div>
-        )}
 
-        {tab === 'hustles' && (
-          <div className="p-6">
-            <h2 className="text-3xl font-black mb-2 dark:text-white tracking-tighter">Hustles 💡</h2>
-            <p className="text-gray-500 mb-8 font-medium">Extra income opportunities for you.</p>
-            <div className="space-y-4">
-              {HUSTLES.map(h => (
-                <div key={h.id} className="bg-white dark:bg-zinc-900 p-6 rounded-[32px] border border-gray-50 dark:border-zinc-800 shadow-sm active:scale-[0.98] transition-all">
-                  <div className="flex gap-4 mb-4">
-                    <span className="text-4xl">{h.em}</span>
-                    <div className="flex-1">
-                      <h4 className="font-black text-gray-900 dark:text-white">{h.title}</h4>
-                      <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1">{h.diff} • COST: {h.cost === 0 ? 'FREE' : fmt(h.cost)}</p>
+          <section className="mb-8">
+            <div className="flex justify-between items-center mb-4"><h3 className="font-black text-lg dark:text-white">Recent Spending</h3><button className="text-green-600 font-bold text-sm">View All</button></div>
+            <div className="space-y-3">
+              {expenses.length === 0 ? (
+                <div className="text-center py-12 bg-gray-50 dark:bg-zinc-900 rounded-[24px] border-2 border-dashed border-gray-100 dark:border-zinc-800 text-gray-400 font-bold italic">No spending records.</div>
+              ) : (
+                expenses.slice(0, 5).map(e => (
+                  <div key={e.id} className="bg-white dark:bg-zinc-900 p-4 rounded-2xl flex items-center justify-between border border-gray-50 dark:border-zinc-800 shadow-sm">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-gray-50 dark:bg-zinc-800 rounded-2xl flex items-center justify-center"><Icon name="bolt" size={22} color="#0FA958" /></div>
+                      <div><p className="font-black text-gray-900 dark:text-white text-sm">{e.cat}</p><p className="text-[10px] text-gray-400 font-bold">{e.date}</p></div>
                     </div>
+                    <p className="font-black text-gray-900 dark:text-white">-{fmt(e.amount)}</p>
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-zinc-400 mb-6 leading-relaxed font-medium">{h.desc}</p>
-                  <button className="w-full py-3.5 bg-gray-50 dark:bg-zinc-800 text-gray-900 dark:text-white font-black rounded-2xl text-xs uppercase tracking-widest hover:bg-green-50 transition-colors">View Roadmap →</button>
+                ))
+              )}
+            </div>
+          </section>
+        </div>
+      )}
+
+      {tab === 'analytics' && (
+        <div className="p-6">
+          <h2 className="text-3xl font-black mb-2 dark:text-white tracking-tighter">Analytics 📊</h2>
+          <p className="text-gray-500 mb-8 font-medium">Your financial health at a glance.</p>
+          <div className="bg-white dark:bg-zinc-900 p-6 rounded-[32px] border border-gray-100 dark:border-zinc-800 shadow-sm mb-6">
+            <h4 className="font-black mb-4 dark:text-white">Savings Rate</h4>
+            <div className="h-4 bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden mb-2"><div className="h-full bg-green-600" style={{ width: '35%' }} /></div>
+            <p className="text-sm font-bold text-gray-500">35% of income saved</p>
+          </div>
+          <div className="bg-white dark:bg-zinc-900 p-6 rounded-[32px] border border-gray-100 dark:border-zinc-800 shadow-sm">
+            <div className="flex justify-between items-center mb-6"><h4 className="font-black dark:text-white">Goals 🎯</h4><button onClick={() => setShowGoalForm(true)} className="text-green-600 font-black text-xs uppercase">+ Add</button></div>
+            {goals.length === 0 ? (
+              <p className="text-center text-gray-400 font-bold text-sm py-8 italic">No goals set yet.</p>
+            ) : (
+              goals.map(g => (
+                <div key={g.id} className="mb-6 last:mb-0">
+                  <div className="flex justify-between text-sm font-black mb-2 dark:text-white"><span>{g.title}</span><span>{fmt(g.current)}</span></div>
+                  <div className="h-2 bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden"><div className="h-full bg-green-600" style={{ width: `${(g.current/g.target)*100}%` }} /></div>
                 </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {tab === 'hustles' && (
+        <div className="p-6">
+          <h2 className="text-3xl font-black mb-2 dark:text-white tracking-tighter">Hustles 💡</h2>
+          <p className="text-gray-500 mb-8 font-medium">Build extra income streams.</p>
+          <div className="space-y-4">
+            {HUSTLES.map(h => (
+              <div key={h.id} className="bg-white dark:bg-zinc-900 p-6 rounded-[32px] border border-gray-100 dark:border-zinc-800 shadow-sm active:scale-[0.98] transition-all" onClick={() => setSelectedHustle(h)}>
+                <div className="flex gap-4 mb-4">
+                  <span className="text-4xl">{h.em}</span>
+                  <div className="flex-1"><h4 className="font-black text-gray-900 dark:text-white">{h.title}</h4><p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1">{h.diff} • COST: {h.cost === 0 ? 'FREE' : fmt(h.cost)}</p></div>
+                </div>
+                <p className="text-sm text-gray-500 dark:text-zinc-400 mb-6 leading-relaxed font-medium">{h.desc}</p>
+                <button className="w-full py-3.5 bg-gray-50 dark:bg-zinc-800 text-gray-900 dark:text-white font-black rounded-2xl text-xs uppercase tracking-widest hover:bg-green-50 transition-colors">View Roadmap →</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {tab === 'profile' && (
+        <div className="p-6">
+          <h2 className="text-3xl font-black mb-8 dark:text-white tracking-tighter">Profile 👤</h2>
+          <div className="bg-white dark:bg-zinc-900 rounded-[32px] overflow-hidden border border-gray-100 dark:border-zinc-800 shadow-sm mb-8">
+            <div className="p-6 bg-green-600 text-white flex items-center gap-4">
+              <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-2xl font-black">{user?.name?.[0]}</div>
+              <div><h3 className="text-xl font-black">{user?.name}</h3><p className="text-sm opacity-80 font-bold">{user?.occupation}</p></div>
+            </div>
+            <div className="p-2">
+              {['Edit Profile', 'Badges', 'Settings', 'Sign Out'].map((item, i) => (
+                <button key={i} className="w-full p-4 flex justify-between items-center font-bold text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-2xl transition-colors"><span>{item}</span><Icon name="arrow" size={16} color="#ccc" /></button>
               ))}
             </div>
           </div>
-        )}
-      </div>
+          <div className="bg-zinc-900 dark:bg-white text-white dark:text-black p-6 rounded-[32px] flex items-center justify-between shadow-xl">
+            <div><p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">Current Level</p><h4 className="text-2xl font-black">Level {Math.floor(xp/100)+1}</h4></div>
+            <div className="text-right"><p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">Experience</p><h4 className="text-2xl font-black">{xp} XP</h4></div>
+          </div>
+        </div>
+      )}
 
       {/* Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-t border-gray-100 dark:border-zinc-800 p-4 px-10 flex justify-between z-50">
+      <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-t border-gray-100 dark:border-zinc-800 p-4 px-8 flex justify-between z-50">
         {[
           { id: 'home', icon: 'home', label: 'Home' },
           { id: 'analytics', icon: 'chart', label: 'Track' },
           { id: 'hustles', icon: 'bulb', label: 'Hustle' },
           { id: 'profile', icon: 'user', label: 'Me' }
         ].map(item => (
-          <button
-            key={item.id}
-            onClick={() => setTab(item.id)}
-            className={`flex flex-col items-center gap-1 transition-all ${tab === item.id ? 'text-green-600 scale-110' : 'text-gray-400'}`}
-          >
-            <Icon name={item.icon as any} size={24} color={tab === item.id ? '#0FA958' : '#999'} sw={tab === item.id ? 2.5 : 1.8} />
+          <button key={item.id} onClick={() => setTab(item.id)} className={`flex flex-col items-center gap-1 transition-all ${tab === item.id ? 'text-green-600 scale-110' : 'text-gray-400'}`}>
+            <Icon name={item.icon as any} size={24} color={tab === item.id ? '#0FA958' : '#999'} sw={tab === item.id ? 2.2 : 1.8} />
             <span className={`text-[9px] font-black uppercase tracking-tighter ${tab === item.id ? 'opacity-100' : 'opacity-0'}`}>{item.label}</span>
           </button>
         ))}
       </nav>
 
-      {/* Forms (Sheets) */}
+      {/* Sheets */}
       <Sheet show={showAddExpense} onClose={() => setShowAddExpense(false)} title="Log Expense 💸">
          <div className="space-y-6">
             <div className="bg-gray-50 dark:bg-zinc-800 p-5 rounded-2xl flex items-center gap-4 border border-gray-100 dark:border-zinc-700">
                <span className="text-3xl font-black text-green-600">₦</span>
                <input type="number" placeholder="0.00" className="bg-transparent flex-1 text-3xl font-black outline-none dark:text-white" autoFocus onKeyDown={(e: any) => { if(e.key === 'Enter') addExpense(Number(e.target.value), 'Other') }} />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-               {['Food', 'Transport', 'Data', 'Rent'].map(c => (
-                 <button key={c} className="py-4 bg-gray-50 dark:bg-zinc-800 rounded-2xl font-black text-xs uppercase tracking-widest dark:text-white hover:bg-green-50 transition-colors border border-gray-100 dark:border-zinc-700">{c}</button>
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              {['Food', 'Transport', 'Data', 'Rent'].map(c => (<button key={c} className="py-4 bg-gray-50 dark:bg-zinc-800 rounded-2xl font-black text-xs uppercase tracking-widest dark:text-white border border-gray-100 dark:border-zinc-700">{c}</button>))}
+            </div>
+            <p className="text-center text-[10px] text-gray-400 font-black uppercase tracking-widest">Press Enter to save</p>
+         </div>
+      </Sheet>
+
+      <Sheet show={selectedHustle} onClose={() => setSelectedHustle(null)} title={`${selectedHustle?.em} ${selectedHustle?.title}`}>
+         <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
+            <p className="text-gray-500 font-medium leading-relaxed">{selectedHustle?.desc}</p>
+            <div className="space-y-4">
+               {selectedHustle?.roadmap.map((phase: any, pi: number) => (
+                 <div key={pi} className="p-4 bg-gray-50 dark:bg-zinc-800 rounded-2xl">
+                    <h5 className="font-black text-gray-900 dark:text-white mb-2 uppercase text-[10px] tracking-widest text-green-600">{phase.phase}</h5>
+                    <ul className="space-y-2">
+                       {phase.steps.map((step: string, si: number) => (
+                         <li key={si} className="flex gap-3 text-sm font-bold text-gray-600 dark:text-zinc-400">
+                            <span className="text-green-500">✓</span> {step}
+                         </li>
+                       ))}
+                    </ul>
+                 </div>
                ))}
             </div>
-            <p className="text-center text-[10px] text-gray-400 font-black uppercase tracking-widest">Press Enter to save to your records</p>
+            <button className="w-full py-4 bg-green-600 text-white font-black rounded-2xl shadow-xl active:scale-95 transition-all">Start This Hustle 🚀</button>
+         </div>
+      </Sheet>
+
+      <Sheet show={showAddIncome} onClose={() => setShowAddIncome(false)} title="Log Income 💰">
+         <div className="space-y-6">
+            <div className="bg-gray-50 dark:bg-zinc-800 p-5 rounded-2xl flex items-center gap-4 border border-gray-100 dark:border-zinc-700">
+               <span className="text-3xl font-black text-green-600">₦</span>
+               <input type="number" placeholder="0.00" className="bg-transparent flex-1 text-3xl font-black outline-none dark:text-white" onKeyDown={(e: any) => { if(e.key === 'Enter') {
+                 const updated = [{id: Date.now(), amount: Number(e.target.value), source: 'Other', date: 'Today'}, ...incomes];
+                 setIncomes(updated); lsSet('incomes', updated); setShowAddIncome(false);
+               }}} />
+            </div>
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              {['Salary', 'Business', 'Gift', 'Freelance'].map(c => (<button key={c} className="py-4 bg-gray-50 dark:bg-zinc-800 rounded-2xl font-black text-xs uppercase tracking-widest dark:text-white border border-gray-100 dark:border-zinc-700">{c}</button>))}
+            </div>
+         </div>
+      </Sheet>
+
+      <Sheet show={showGoalForm} onClose={() => setShowGoalForm(false)} title="New Goal 🎯">
+         <div className="space-y-6">
+            <input placeholder="Goal Title (e.g. New Laptop)" className="w-full p-4 rounded-2xl bg-gray-50 dark:bg-zinc-800 dark:text-white font-bold outline-none" />
+            <input type="number" placeholder="Target (₦)" className="w-full p-4 rounded-2xl bg-gray-50 dark:bg-zinc-800 dark:text-white font-bold outline-none" />
+            <button className="w-full py-5 bg-green-600 text-white font-black rounded-2xl shadow-xl active:scale-95 transition-all">Create Goal</button>
          </div>
       </Sheet>
 
